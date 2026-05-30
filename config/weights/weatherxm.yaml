@@ -1,0 +1,41 @@
+network: weatherxm
+version: "0.1.0"
+
+# Detector weights must sum to 1.0
+# WeatherXM focuses heavily on GPS and sensor data quality because
+# physical station placement is critical for data validity.
+weights:
+  gps_plausibility: 0.35    # Station must be at a physically plausible fixed location
+  timing_anomaly: 0.25      # Synchronized downtime across stations is a strong signal
+  sensor_replay: 0.25       # Replayed or synthesized meteorological readings
+  geographic_cluster: 0.15  # Multiple stations implausibly close together
+
+# Score-to-band thresholds (inclusive lower bound)
+thresholds:
+  clean: 85       # score >= 85 → clean
+  watch: 60       # score 60-84 → watch
+  suspicious: 30  # score 30-59 → suspicious
+  sybil: 0        # score 0-29  → sybil
+
+# Detector-specific configuration
+detectors:
+  gps_plausibility:
+    max_daily_drift_km: 0.05          # Fixed stations should not move at all
+    min_altitude_m: -50               # Basic sanity check
+    max_altitude_m: 5000
+    require_fixed_location: true
+
+  timing_anomaly:
+    correlation_window_hours: 24
+    max_sync_ratio: 0.15              # Fraction of shared uptime/downtime events
+    min_sample_days: 7                # Need at least 7 days to assess
+
+  sensor_replay:
+    entropy_min_threshold: 0.6        # Low entropy = likely synthetic data
+    cross_correlation_window: 3600    # seconds — check for copied readings
+    max_neighbor_similarity: 0.95     # Similarity score to nearest neighbors
+
+  geographic_cluster:
+    cluster_radius_m: 100             # Stations within 100m are suspicious
+    min_cluster_size: 3
+    confidence_decay_distance_m: 500  # Cluster confidence falls off with distance

@@ -1,0 +1,47 @@
+network: nubila
+version: "0.1.0"
+
+# Detector weights must sum to 1.0
+# Nubila is a cloud-sensing / atmospheric network. Sensor data entropy is the
+# strongest signal because atmospheric readings have natural high variance.
+# Network is smaller so geographic cluster checks are tighter.
+weights:
+  gps_plausibility: 0.30       # Fixed sensors must remain stationary
+  timing_anomaly: 0.20         # Correlated uptime/downtime
+  sensor_replay: 0.30          # Replayed or synthetic atmospheric data
+  geographic_cluster: 0.20     # Multiple sensors in implausibly close proximity
+
+# Score-to-band thresholds (inclusive lower bound)
+thresholds:
+  clean: 85
+  watch: 60
+  suspicious: 30
+  sybil: 0
+
+# Detector-specific configuration
+detectors:
+  gps_plausibility:
+    max_daily_drift_km: 0.02        # Atmospheric sensors are fixed infrastructure
+    require_fixed_location: true
+    min_altitude_m: -50
+    max_altitude_m: 8000            # Allow high-altitude deployments
+    elevation_change_alert_m: 5     # Any elevation change > 5m triggers review
+
+  timing_anomaly:
+    correlation_window_hours: 48
+    max_sync_ratio: 0.18
+    min_sample_days: 7
+    flag_perfect_uptime: true       # 100% uptime over long periods is suspicious
+
+  sensor_replay:
+    entropy_min_threshold: 0.70     # Atmospheric data should have high natural variance
+    cross_correlation_window: 3600
+    max_neighbor_similarity: 0.92
+    check_pressure_gradient: true   # Pressure readings must follow physical gradients
+    check_humidity_consistency: true
+
+  geographic_cluster:
+    cluster_radius_m: 150           # Atmospheric sensors within 150m provide no unique value
+    min_cluster_size: 2
+    confidence_decay_distance_m: 750
+    flag_single_building_clusters: true  # Multiple sensors in one building = likely Sybil

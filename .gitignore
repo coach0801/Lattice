@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+.mypy_cache/
+.pytest_cache/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Turbo
+.turbo/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python virtual envs
+venv/
+.venv/
+env/
+
+# Foundry
+cache/
+out/
+broadcast/
+
+# Test coverage
+coverage/
+lcov.info
+
+# Logs
+*.log
+logs/
+
+# Misc
+*.pem

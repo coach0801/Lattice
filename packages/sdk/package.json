@@ -1,0 +1,31 @@
+{
+  "name": "@lattice-protocol/sdk",
+  "version": "0.1.0",
+  "description": "Official TypeScript SDK for Lattice Protocol — DePIN integrity attestations",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "test": "vitest"
+  },
+  "keywords": ["depin", "sybil-detection", "integrity", "blockchain", "lattice"],
+  "license": "MIT",
+  "dependencies": {
+    "viem": "^2.19.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsup": "^8.2.4",
+    "typescript": "^5",
+    "vitest": "^2.0.5"
+  }
+}

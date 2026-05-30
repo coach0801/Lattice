@@ -1,0 +1,48 @@
+network: hivemapper
+version: "0.1.0"
+
+# Detector weights must sum to 1.0
+# Hivemapper dashcams move with vehicles; GPS plausibility checks driving routes.
+# Cross-network linkage is elevated because many Sybil operators run across networks.
+weights:
+  gps_plausibility: 0.30       # Route plausibility, speed limits, road-network adherence
+  timing_anomaly: 0.20         # Correlated uptime with other dashcams
+  sensor_replay: 0.20          # Replayed dashcam footage or GPS tracks
+  geographic_cluster: 0.15     # Multiple cameras always operating in the same area
+  cross_network_linkage: 0.15  # Wallet/hardware overlap with other DePIN networks
+
+# Score-to-band thresholds (inclusive lower bound)
+thresholds:
+  clean: 85
+  watch: 60
+  suspicious: 30
+  sybil: 0
+
+# Detector-specific configuration
+detectors:
+  gps_plausibility:
+    max_speed_kmh: 250              # Hard cap — faster = GPS spoofing
+    min_road_proximity_m: 25        # Must be within 25m of a mapped road
+    require_continuous_trace: true  # Gaps > 5 min without movement are flagged
+    max_gap_minutes: 5
+
+  timing_anomaly:
+    correlation_window_hours: 48
+    max_sync_ratio: 0.20
+    min_sample_days: 14
+
+  sensor_replay:
+    video_hash_window_hours: 72     # Check for re-uploaded identical footage hashes
+    gps_trace_similarity_threshold: 0.92
+    max_exact_replay_tolerance: 0   # Zero tolerance for exact GPS replay
+
+  geographic_cluster:
+    cluster_radius_m: 200           # Dashcams within 200m are suspicious if non-moving
+    min_cluster_size: 3
+    exclude_parking_events: true    # Don't flag parked vehicles
+
+  cross_network_linkage:
+    check_networks: ["geodnet", "weatherxm", "dimo", "nubila"]
+    wallet_overlap_weight: 0.6
+    hardware_fp_overlap_weight: 0.4
+    min_confidence_to_flag: 0.7

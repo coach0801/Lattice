@@ -1,0 +1,44 @@
+network: geodnet
+version: "0.1.0"
+
+# Detector weights must sum to 1.0
+# GEODNET RTK reference stations are fixed infrastructure; GPS drift is the
+# most diagnostic signal. Sensor replay is less relevant than for weather nodes
+# because GNSS data has natural high-entropy variation.
+weights:
+  gps_plausibility: 0.40       # Primary: RTK stations must be perfectly fixed
+  timing_anomaly: 0.25         # Correlated outages across stations
+  sensor_replay: 0.15          # Lower weight — GNSS data is harder to replay convincingly
+  geographic_cluster: 0.20     # Multiple stations implausibly co-located
+
+# Score-to-band thresholds (inclusive lower bound)
+thresholds:
+  clean: 85
+  watch: 60
+  suspicious: 30
+  sybil: 0
+
+# Detector-specific configuration
+detectors:
+  gps_plausibility:
+    max_daily_drift_mm: 10          # RTK stations: sub-centimeter stability expected
+    coordinate_consistency_window_days: 30
+    require_fixed_location: true
+    elevation_variance_max_m: 0.05  # Extremely tight for precision GNSS
+
+  timing_anomaly:
+    correlation_window_hours: 72
+    max_sync_ratio: 0.10            # Stricter: RTK stations should have independent uptime
+    min_sample_days: 14
+    flag_coordinated_maintenance: true
+
+  sensor_replay:
+    entropy_min_threshold: 0.75     # GNSS data should have high natural entropy
+    cross_correlation_window: 1800
+    max_neighbor_similarity: 0.90
+
+  geographic_cluster:
+    cluster_radius_m: 500           # RTK base stations need separation for utility
+    min_cluster_size: 2             # Even 2 co-located stations is suspicious
+    min_separation_km: 5            # Recommended minimum coverage cell size
+    confidence_decay_distance_m: 2000

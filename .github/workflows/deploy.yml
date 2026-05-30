@@ -1,0 +1,22 @@
+# Vercel Auto-Deploy
+#
+# Lattice Protocol's web app (apps/web) is deployed automatically by Vercel
+# via the GitHub integration — no manual workflow is needed here.
+#
+# How it works:
+#   - Every push to `main` triggers a Production deployment on Vercel.
+#   - Every pull request triggers a Preview deployment with a unique URL.
+#   - Vercel runs `turbo run build --filter=@lattice/web` as the build command.
+#
+# To configure:
+#   1. Connect this repo in the Vercel dashboard (vercel.com/new).
+#   2. Set the Root Directory to `apps/web` (or use the turbo filter approach).
+#   3. Add your environment variables in Vercel project settings:
+#        DATABASE_URL         — Neon/Supabase Postgres connection string
+#        NEXT_PUBLIC_APP_URL  — Your production URL
+#        ATTESTATION_CONTRACT — LatticeAttestation contract address on OP Sepolia
+#        OP_SEPOLIA_RPC       — RPC URL for OP Sepolia
+#
+# This file is intentionally left as a documentation placeholder.
+# The actual deployment is handled by Vercel's GitHub App — see:
+#   https://vercel.com/docs/concepts/git/vercel-for-github

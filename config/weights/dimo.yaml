@@ -1,0 +1,51 @@
+network: dimo
+version: "0.1.0"
+
+# Detector weights must sum to 1.0
+# DIMO vehicles are mobile and connected. The primary Sybil vector is
+# spoofed OBD-II data or GPS tracks, and wallet graph analysis is strong
+# because vehicle NFTs are on-chain assets with traceable provenance.
+weights:
+  gps_plausibility: 0.25       # Route plausibility for vehicles
+  timing_anomaly: 0.20         # Vehicles active in patterns that don't match usage
+  sensor_replay: 0.30          # OBD-II and GPS replay is the primary attack vector
+  geographic_cluster: 0.10     # Vehicles always reported in same location
+  cross_network_linkage: 0.15  # Sybil operators often span DIMO + Hivemapper
+
+# Score-to-band thresholds (inclusive lower bound)
+thresholds:
+  clean: 85
+  watch: 60
+  suspicious: 30
+  sybil: 0
+
+# Detector-specific configuration
+detectors:
+  gps_plausibility:
+    max_speed_kmh: 300              # Hard speed cap
+    min_road_proximity_m: 30
+    require_realistic_acceleration: true
+    max_acceleration_ms2: 15        # ~1.5g max for normal vehicles
+
+  timing_anomaly:
+    correlation_window_hours: 168   # 1 week
+    max_sync_ratio: 0.25
+    min_sample_days: 14
+    flag_always_on: true            # Vehicles that never turn off are suspicious
+
+  sensor_replay:
+    obd2_entropy_min: 0.65          # OBD-II readings should have natural variance
+    gps_trace_similarity_threshold: 0.90
+    vin_hash_collision_check: true  # Two nodes claiming same VIN hash → immediate sybil
+    telemetry_hash_window_hours: 24
+
+  geographic_cluster:
+    cluster_radius_m: 50            # Tighter — different cars shouldn't share a garage
+    min_cluster_size: 5             # Fleet-like clustering threshold
+    exclude_dealer_lots: true
+
+  cross_network_linkage:
+    check_networks: ["hivemapper", "nubila"]
+    wallet_overlap_weight: 0.5
+    hardware_fp_overlap_weight: 0.5
+    min_confidence_to_flag: 0.65
